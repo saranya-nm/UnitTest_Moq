@@ -10,8 +10,8 @@ namespace App.Tests
     {
         private readonly Mock<ICompanyRepository> _companyRepositoryMock = new Mock<ICompanyRepository>();
         private readonly Mock<ICustomerCreditService> _custCredMock = new Mock<ICustomerCreditService>();
-        private CustomerService _cusService;
         private readonly Mock<ICustomerDataAccess> _custMockData = new Mock<ICustomerDataAccess>();
+        private CustomerService _cusService;
 
         [SetUp]
         public void SetUp()
@@ -26,6 +26,7 @@ namespace App.Tests
         [Test]
         public void AddCustomerTest_ImpPositive()
         {
+            //Arrange
             Company company = new Company { Id = 4, 
                                             Name = "ImportantClient", 
                                             Classification = Classification.Gold };
@@ -36,14 +37,19 @@ namespace App.Tests
                                             "Joe", 
                                             "Bloggs");
 
-            _companyRepositoryMock.Setup(x => x.GetById(company.Id)).Returns(company);
             var credLimit = 260;
+
+            _companyRepositoryMock.Setup(x => x.GetById(company.Id)).Returns(company);
+           
             _custCredMock.Setup(a => a.GetCreditLimit(customer.Firstname, customer.Surname, customer.DateOfBirth))
                 .Returns(Task.FromResult(credLimit));
+
             _custMockData.Setup(at => at.AddCustomer(customer)).Verifiable();
+
+            //Act
             var result = _cusService.AddCustomer(customer.Firstname, customer.Surname, customer.EmailAddress, 
                 customer.DateOfBirth, company.Id);
-
+            //Assert
             Assert.True(result);
         }
 
@@ -68,7 +74,8 @@ namespace App.Tests
                                             "Bloggs");
 
             _companyRepositoryMock.Setup(x => x.GetById(company.Id)).Returns(company);
-            var credLimit = 5;
+            var credLimit = 5; //Low Credit Limit
+
             _custCredMock.Setup(a => a.GetCreditLimit(customer.Firstname, customer.Surname, customer.DateOfBirth))
                 .Returns(Task.FromResult(credLimit));
             _custMockData.Setup(at => at.AddCustomer(customer)).Verifiable();
@@ -143,6 +150,7 @@ namespace App.Tests
         [Test]
         public void AddCustomerTest_VeryImpPos()
         {
+            //Test for VeryImportant Client. No credit limit set.
             Company company = new Company
             {
                 Id = 4,
@@ -161,9 +169,11 @@ namespace App.Tests
             _custCredMock.Setup(a => a.GetCreditLimit(customer.Firstname, customer.Surname, customer.DateOfBirth))
                 .Returns(Task.FromResult(credLimit));
             _custMockData.Setup(at => at.AddCustomer(customer)).Verifiable();
+
+            //Act
             var result = _cusService.AddCustomer(customer.Firstname, customer.Surname, customer.EmailAddress, 
                 customer.DateOfBirth, company.Id);
-
+            //Assert
             Assert.True(result);
         }
 
